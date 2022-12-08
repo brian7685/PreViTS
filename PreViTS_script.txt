@@ -1,0 +1,67 @@
+# Setup environment
+
+pip install -r req.txt
+
+# pretrain 2D model on VGG-Sound
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 python pretrain_2D_grad3.py \
+-e exps/pretext-resnet50_vggs_train_2D_grad_gw3_b16 -c config/pretrain/resnet50_vgg_2D_16_moco.jsonnet \
+--mid_n 0 --gw 3 --no-scale-lr
+
+# pretrain 2D model on Kinetics400
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 python pretrain_2D_grad3.py \
+-e exps/pretext-resnet50_kinetics_train_2D_grad_gw3_b16 -c config/pretrain/resnet50_kinetics_2D_moco.jsonnet \
+--mid_n 0 --gw 3 --no-scale-lr
+
+# pretrain S3D model on VGG-Sound
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 python pretrain_S3D_grad.py \
+-e exps/pretext-s3d_vggs_train_grad_gw3_b16 -c config/pretrain/s3dg_vggs_train.jsonnet \
+--gw 3.0  
+
+# pretrain S3D model on Kinetics400
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 python pretrain_S3D_grad.py \
+-e exps/pretext-s3d_kinetics_train_grad_gw3_b16 -c config/pretrain/s3dg_kinetics.jsonnet \
+--gw 3.0  
+
+# fintune on ucf101
+
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python finetune.py -c config/finetune/ucf101_s3dg.jsonnet  \
+--mc weights/s3d_kinetics_train_grad_16_gw3.pth.tar  \
+-e exps/ucf101-s3d_kinetics_train_grad_16_gw3
+
+# Video Background Challenge
+
+python finetune_j.py -c config/finetune/jhmdb_original.jsonnet  \
+                   --mc weights/s3d_kinetics_train_grad_16_gw3_UCF101_checkpoint.pth.tar  \
+                   -e exps/ucf_jhmdb_original-s3d_kinetics_train_grad_16_gw3
+
+python finetune_j.py -c config/finetune/jhmdb_fg.jsonnet  \
+                   --mc weights/s3d_kinetics_train_grad_16_gw3_UCF101_checkpoint.pth.tar  \
+                   -e exps/ucf_jhmdb_fg-s3d_kinetics_train_grad_16_gw3
+
+python finetune_j.py -c config/finetune/jhmdb_bg.jsonnet  \
+                   --mc weights/s3d_kinetics_train_grad_16_gw3_UCF101_checkpoint.pth.tar  \
+                   -e exps/ucf_jhmdb_bg-s3d_kinetics_train_grad_16_gw3
+
+python finetune_j.py -c config/finetune/jhmdb_bg_b.jsonnet  \
+                   --mc weights/s3d_kinetics_train_grad_16_gw3_UCF101_checkpoint.pth.tar  \
+                   -e exps/ucf_jhmdb_bg_b-s3d_kinetics_train_grad_16_gw3
+
+python finetune_j.py -c config/finetune/jhmdb_bg_t.jsonnet  \
+                   --mc weights/s3d_kinetics_train_grad_16_gw3_UCF101_checkpoint.pth.tar  \
+                   -e exps/ucf_jhmdb_bg_t-s3d_kinetics_train_grad_16_gw3
+
+python finetune_j.py -c config/finetune/jhmdb_mix_same.jsonnet  \
+                   --mc weights/s3d_kinetics_train_grad_16_gw3_UCF101_checkpoint.pth.tar  \
+                   -e exps/ucf_jhmdb_mix_same-s3d_kinetics_train_grad_16_gw3
+
+python finetune_j.py -c config/finetune/jhmdb_mix_rand.jsonnet  \
+                   --mc weights/s3d_kinetics_train_grad_16_gw3_UCF101_checkpoint.pth.tar  \
+                   -e exps/ucf_jhmdb_mix_rand-s3d_kinetics_train_grad_16_gw3
+
+python finetune_j.py -c config/finetune/jhmdb_mix_next.jsonnet  \
+                   --mc weights/s3d_kinetics_train_grad_16_gw3_UCF101_checkpoint.pth.tar  \
+                   -e exps/jhmdb_mix_next-s3d_kinetics_train_grad_16_gw3
